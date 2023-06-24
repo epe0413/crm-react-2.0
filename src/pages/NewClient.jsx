@@ -1,5 +1,10 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Form } from 'react-router-dom'
 import Formulario from '../components/Formulario'
+
+export function action(){
+    console.log('Submit al formulario...')
+    return 'Retornar algo'
+}
 
 const NewClient = () => {
 
@@ -17,7 +22,9 @@ const NewClient = () => {
 
             <div className='bg-white shadow rounded-md md:w-3/4 mx-auto px-3 py-5 mt-5'>
 
-                <form>
+                <Form
+                    method='post'
+                >
                     <Formulario/>
 
                     <input
@@ -25,7 +32,7 @@ const NewClient = () => {
                         className='mt-5 w-full bg-cyan-800 p-2 uppercase font-bold text-white rounded-md hover:bg-cyan-900 hover:cursor-pointer'
                         value="Registrar Cliente"
                     />
-                </form>
+                </Form>
             </div>
         </>
     )
