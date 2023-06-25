@@ -1,6 +1,7 @@
-import { Form, useNavigate, useLoaderData } from 'react-router-dom'
+import { Form, useNavigate, useLoaderData, useActionData, redirect } from 'react-router-dom'
 import Formulario from "../components/Formulario";
-import { obtenerCliente } from "../data/clientes";
+import { actualizarCliente, obtenerCliente } from "../data/clientes";
+import Error from '../components/Error';
 
 export async function loader({params}){
     const cliente = await obtenerCliente(params.clientId)
@@ -15,10 +16,38 @@ export async function loader({params}){
     return cliente
 }
 
+export async function action({request, params}) {
+    const formData = await request.formData();
+    const datos = Object.fromEntries(formData);
+
+    const email = formData.get('email')
+    
+    //Validación
+    const errores = [];
+    if(Object.values(datos).includes('')) {
+        errores.push('Todos los campos son obligatorios')
+    }
+
+    let regex = new RegExp("([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\"\(\[\]!#-[^-~ \t]|(\\[\t -~]))+\")@([!#-'*+/-9=?A-Z^-~-]+(\.[!#-'*+/-9=?A-Z^-~-]+)*|\[[\t -Z^-~]*])");
+
+    if(!regex.test(email)){
+        errores.push('El Email no es válido')
+    }
+
+    if(Object.keys(errores).length){
+        return errores
+    }
+
+    // Actualizar cliente
+    await actualizarCliente(params.clientId, datos);
+    return redirect('/')
+}
+
 const EditClient = () => {
 
     const navigate = useNavigate();
-    const cliente = useLoaderData()
+    const cliente = useLoaderData();
+    const errores = useActionData();
 
     return (
         <>
@@ -33,7 +62,7 @@ const EditClient = () => {
 
             <div className='bg-white shadow rounded-md md:w-3/4 mx-auto px-3 py-5 mt-5'>
 
-                {/* {errores?.length && errores.map( (error, i) => <Error key={i}>{error}</Error>)} */}
+                {errores?.length && errores.map( (error, i) => <Error key={i}>{error}</Error>)}
 
                 <Form
                     method='post'
@@ -46,7 +75,7 @@ const EditClient = () => {
                     <input
                         type="submit"
                         className='mt-5 w-full bg-cyan-800 p-2 uppercase font-bold text-white rounded-md hover:bg-cyan-900 hover:cursor-pointer'
-                        value="Registrar Cliente"
+                        value="Actualizar Cliente"
                     />
                 </Form>
             </div>
